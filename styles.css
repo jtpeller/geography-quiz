@@ -1,0 +1,50 @@
+/* tags */
+body {
+    background-color: rgb(29, 31, 34);
+    color: whitesmoke;
+}
+
+svg {
+    background-color: rgb(138, 180, 248);
+    border:1px solid gray;
+    border-radius:10px;
+    margin-left: 10px;
+    width: 1000px;
+    height: 640px;
+}
+
+/* classes */
+.banner {
+    background-color: rgb(41, 44, 49);
+    color: white;
+    text-align: center;
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+}
+
+.correct {
+    fill: rgb(14, 194, 14);
+}
+
+.incorrect {
+    fill: rgb(248, 12, 12);
+}
+
+.highlighted {
+    stroke-width: 3px !important;
+    fill:rgb(48, 137, 253)
+}
+
+.map {
+    stroke: rgb(255, 255, 255);
+    stroke-width: 1.5px;
+}
+
+.wrapper {
+    width: 1600px;
+    height: 700px;
+    margin: auto;
+    margin-top: 10px;
+}
+
+/* IDs */
