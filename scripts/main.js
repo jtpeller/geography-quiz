@@ -134,8 +134,16 @@ function init() {
 }
 
 function initMap() {
-    let selected = select.property('value');
+    // reset all counters, reset all map
+    d3.selectAll('.map').classed('correct incorrect', false)
+    userscore.text('0')
+    wrongscore.text('0')
+    totalguess.text('0')
+    totalscore.text('0')
     
+    // get the current map
+    let selected = select.property('value');
+        
     // svg inits
     width = +svg.style('width').replace('px', '');
     height = +svg.style('height').replace('px', '');
@@ -167,7 +175,10 @@ function drawMap(geojson, continent) {
     totalscore.text(countries.length)
 
     let g = svg.append('g');
-
+    let labels = svg.append('g')
+        .attr('id', 'labels');
+    
+    // add the map
     map = g.selectAll('.map')
         .data(geojson.features)
         .join('path')
@@ -179,14 +190,16 @@ function drawMap(geojson, continent) {
             d3.select(this).classed('highlighted', true);
         })
         .on('click', function(d, i) {
-            d3.select('#'+countries[idx].replaceAll(' ', '_').replaceAll('.', ''))
-                .classed(d.properties.name_long === countries[idx] ? 'correct' : 'incorrect', true)
+            var c = countries[idx]
+
+            d3.select('#'+c.replaceAll(' ', '_').replaceAll('.', ''))
+                .classed(d.properties.name_long === c ? 'correct' : 'incorrect', true)
                 .on('mouseover', null)
                 .on('mouseout', null) // clear out the mouse listeners
                 .on('click', null)
                 .classed('highlighted', false); // remove any highlighting
 
-            if (d.properties.name_long === countries[idx]) {
+            if (d.properties.name_long === c) {
                 userscore.text((+userscore.text())+1)
                 var val = +userscore.text() / +totalscore.text() * 100
                 percent.text( `${Math.round( (val + Number.EPSILON) * 100) / 100}%` )
@@ -206,9 +219,16 @@ function drawMap(geojson, continent) {
                 countries.splice(idx, 1);
     
                 idx = rng(0, countries.length);
-                instruction.text(countries[idx]);
-
+                instruction.text(c);
             }
+
+            // add the label for the correct country
+            var coords = getCoords(geojson, c);
+            labels.append('text')
+                .text(c)
+                .attr('text-anchor', 'middle')
+                .attr('x', coords[0])
+                .attr('y', coords[1]);
         })
         .on('mouseout', function(d, i) {
             d3.select(this).classed('highlighted', false);
@@ -257,4 +277,21 @@ function getProjection(geojson, continent) {
 
 function rng(min, max) {
     return Math.floor(Math.random() * max) - min;
+}
+
+function getCoords(geojson, country) {
+    // first, find the country
+    var found = null;
+    for (var i = 0; i < geojson.features.length; i++) {
+        if (geojson.features[i].properties.name_long == country) {
+            found = d3.select('#'+geojson.features[i].properties.name_long.replaceAll(' ', '_').replaceAll('.', ''))
+            break;
+        }
+    }
+
+    // now, figure out where the midpoint of the country is
+    // make the d3 selection
+    var element = found.node();
+    var bbox = element.getBBox();
+    return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
 }
