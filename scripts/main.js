@@ -124,8 +124,15 @@ function init() {
             totalguess.text('0')
             totalscore.text('0')
 
+            d3.select('#finished').style('opacity', 0);
+
             initMap();
         })
+
+    controls.append('span')
+        .attr('id', 'finished')
+        .html(' &#8592; You finished! Click here to restart the quiz!')
+        .style('opacity', 0);
 
     // then, parse in the data. default to Africa
     // and call draw map and whatnot
@@ -214,21 +221,25 @@ function drawMap(geojson, continent) {
             if (+totalguess.text() >= +totalscore.text()) {
                 // remove click listener (user is done)
                 d3.selectAll('.map').on('click', null);
+
+                d3.select('#finished').style('opacity', 1); // make it visible
+
             } else {        // otherwise, continue the quiz
+                // add the label for the correct country
+                var coords = getCoords(geojson, c);
+                labels.append('text')
+                    .text(c)
+                    .attr('text-anchor', 'middle')
+                    .attr('x', coords[0])
+                    .attr('y', coords[1]);
+
                 // remove country from countries & select a new one
                 countries.splice(idx, 1);
     
                 idx = rng(0, countries.length);
+                c = countries[idx];
                 instruction.text(c);
             }
-
-            // add the label for the correct country
-            var coords = getCoords(geojson, c);
-            labels.append('text')
-                .text(c)
-                .attr('text-anchor', 'middle')
-                .attr('x', coords[0])
-                .attr('y', coords[1]);
         })
         .on('mouseout', function(d, i) {
             d3.select(this).classed('highlighted', false);
