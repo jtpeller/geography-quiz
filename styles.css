@@ -31,13 +31,13 @@ svg {
 }
 
 .highlighted {
-    stroke-width: 3px !important;
+    stroke-width: 2px !important;
     fill:rgb(48, 137, 253)
 }
 
 .map {
-    stroke: rgb(255, 255, 255);
-    stroke-width: 1.5px;
+    stroke: rgb(0, 0, 0);
+    stroke-width: 1px;
 }
 
 .wrapper {

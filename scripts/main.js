@@ -17,8 +17,10 @@ let ids = {
 };
 
 let left, right, svg, controls, select, instruction,
-    userscore, totalscore, percent;
+    userscore, totalscore, percent, reset_zoom, zoom;
 let map;
+
+const dur = 500;
 
 let regions = [
     "Africa", "Asia", "Europe", "North America", 
@@ -97,19 +99,42 @@ function init() {
     var scoretable = div.append('table')
         .classed('table table-dark', true);
 
-    var headerrow = scoretable.append('thead').append('tr')
-    headerrow.append('th').attr('scope', 'col').text('Correct')
-    headerrow.append('th').attr('scope', 'col').text('Incorrect')
-    headerrow.append('th').attr('scope', 'col').text('Guesses')
-    headerrow.append('th').attr('scope', 'col').text('Total')
+    var headerrow = scoretable.append('thead').append('tr');
+    headerrow.append('th').attr('scope', 'col').text('Correct');
+    headerrow.append('th').attr('scope', 'col').text('Incorrect');
+    headerrow.append('th').attr('scope', 'col').text('Guesses');
+    headerrow.append('th').attr('scope', 'col').text('Total');
     headerrow.append('th').attr('scope', 'col').text('% Correct');
 
-    var body = scoretable.append('tbody').append('tr')
-    userscore = body.append('td').text('0')
-    wrongscore = body.append('td').text('0')
-    totalguess = body.append('td').text('0')
-    totalscore = body.append('td').text('0')
-    percent = body.append('td').text('0%')
+    var body = scoretable.append('tbody').append('tr');
+    userscore = body.append('td').text('0');
+    wrongscore = body.append('td').text('0');
+    totalguess = body.append('td').text('0');
+    totalscore = body.append('td').text('0');
+    percent = body.append('td').text('0%');
+
+    // zoom setup
+    zoom = d3.zoom()
+        .scaleExtent([1, 8])
+        .on('zoom', function() {
+            d3.select('#svg-g').selectAll('path').attr('transform', d3.event.transform);
+            d3.select('#labels').selectAll('text').attr('transform', d3.event.transform);
+        });
+
+    // add a reset_zoom button
+    reset_zoom = controls.append('button')
+        .classed('btn btn-outline-light', true)
+        .style('width', '100%')
+        .text('Reset Zoom')
+        .on('click', function() {
+            svg.transition().duration(dur).call(zoom.transform, d3.zoomIdentity);
+        })
+
+    reset_zoom.dispatch('click');
+    svg.call(zoom)                      // establish zoom behavior
+        .on('dblclick.zoom', function() {
+            svg.transition().duration(dur).call(zoom.transform, d3.zoomIdentity);
+        });     // no dbl click to zoom
 
     // add a reset button and some other stuff
     controls.append('hr');
@@ -118,11 +143,7 @@ function init() {
         .text('Restart')
         .on('click', function() {
             // reset all counters, reset all map
-            d3.selectAll('.map').classed('correct incorrect', false)
-            userscore.text('0')
-            wrongscore.text('0')
-            totalguess.text('0')
-            totalscore.text('0')
+            resetCounters();
 
             d3.select('#finished').style('opacity', 0);
 
@@ -142,11 +163,7 @@ function init() {
 
 function initMap() {
     // reset all counters, reset all map
-    d3.selectAll('.map').classed('correct incorrect', false)
-    userscore.text('0')
-    wrongscore.text('0')
-    totalguess.text('0')
-    totalscore.text('0')
+    resetCounters();
     
     // get the current map
     let selected = select.property('value');
@@ -181,7 +198,7 @@ function drawMap(geojson, continent) {
     instruction.text(countries[idx])
     totalscore.text(countries.length)
 
-    let g = svg.append('g');
+    let g = svg.append('g').attr('id', 'svg-g');
     let labels = svg.append('g')
         .attr('id', 'labels');
     
@@ -231,8 +248,16 @@ function drawMap(geojson, continent) {
                     .text(c)
                     .attr('text-anchor', 'middle')
                     .attr('x', coords[0])
-                    .attr('y', coords[1]);
+                    .attr('y', coords[1])
 
+                // zoom into/center on the correct country
+                var x = coords[0], y = coords[1];
+                svg.transition().duration(dur)
+                    .call(
+                        zoom.transform,
+                        d3.zoomIdentity.translate(width/2, height/2).scale(2).translate(-x, -y)
+                    );
+                
                 // remove country from countries & select a new one
                 countries.splice(idx, 1);
     
@@ -305,4 +330,16 @@ function getCoords(geojson, country) {
     var element = found.node();
     var bbox = element.getBBox();
     return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
+}
+
+/**
+ * resets the map and counters for a new quiz
+ */
+function resetCounters() {
+    d3.selectAll('.map').classed('correct incorrect', false);
+    userscore.text('0');
+    wrongscore.text('0');
+    totalguess.text('0');
+    totalscore.text('0');
+    percent.text('0');
 }
