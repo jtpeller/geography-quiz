@@ -57,7 +57,7 @@ for (var i = 0; i < regions.length; i++) {
         .classed('navbar-nav mx-auto mb-2 mb-lg-0', true);
 
     ul.append('a')
-        .classed('navbar-brand d-none d-lg-block', true)
+        .classed('navbar-brand d-none d-lg-block gradient-transparent border-highlight', true)
         .attr('href', 'index.html')
         .text('Geography');
 

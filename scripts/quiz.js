@@ -11,10 +11,9 @@ let ids = {
     totalscore: '#totalscore'
 };
 
-let header, content;
-
-let left, right, title, svg, controls, select, instruction,
-    userscore, totalscore, percent, reset_zoom, zoom;
+// elements
+let header, content, title, svg, controls, instruction,
+    userscore, totalscore, percent, zoom;
 let map;
 
 const dur = 500;
@@ -27,6 +26,8 @@ let margin = {top: 10, left: 10, right: 10, bottom: 10};
 let innerwidth, innerheight; // defined in init
 
 let region;
+
+let zoom_disabled = true;
 
 //
 // init page on load
@@ -43,11 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var rowdiv = content.append('div')
         .classed('row flex-center', true);
     
-    left = rowdiv.append('div')
+    var left = rowdiv.append('div')
         .attr('id', 'left')
         .classed('col-4', true);
 
-    right = rowdiv.append('div')
+    var right = rowdiv.append('div')
         .attr('id', 'right')
         .classed('col', true);
 
@@ -120,40 +121,49 @@ function init() {
             d3.select('#labels').selectAll('text').attr('transform', d3.event.transform);
         });
 
-    // add a reset_zoom button
-    reset_zoom = controls.append('button')
+    // add a reset zoom button
+    controls.append('button')
         .classed('btn site-btn', true)
-        .style('width', '100%')
         .text('Reset Zoom')
         .on('click', function() {
             svg.transition().duration(dur).call(zoom.transform, d3.zoomIdentity);
-        })
+        }).dispatch('click');
 
-    reset_zoom.dispatch('click');
     svg.call(zoom)                      // establish zoom behavior
         .on('dblclick.zoom', function() {
             svg.transition().duration(dur).call(zoom.transform, d3.zoomIdentity);
         });     // no dbl click to zoom
 
+    // add a disable zoom checkbox
+    var div = controls.append('div')
+        .classed('form-check form-switch', true);
+
+    div.append('input')
+        .classed('form-check-input', true)
+        .attr('type', 'checkbox')
+        .attr('value', '')
+        .attr('id', 'disable-zoom')
+        .property('checked', true)
+        .on('click', function() {
+            zoom_disabled = d3.select(this).property('checked');
+        })
+
+    div.append('label')
+        .classed('form-check-label', true)
+        .attr('for', 'disable-zoom')
+        .text('Disable Zoom Onto Countries')
+
+
     // add a reset button and some other stuff
     controls.append('hr');
     controls.append('button')
         .classed('btn site-btn', true)
-        .style('width', '100%')
         .text('Restart')
         .on('click', function() {
             // reset all counters, reset all map
             resetCounters();
-
-            d3.select('#finished').style('opacity', 0);
-
             initMap();
         })
-
-    controls.append('span')
-        .attr('id', 'finished')
-        .html(' &#8592; You finished! Click here to restart the quiz!')
-        .style('opacity', 0);
 
     // initialize the map last
     initMap();
@@ -196,6 +206,38 @@ function drawMap(geojson, continent) {
     let g = svg.append('g').attr('id', 'svg-g');
     let labels = svg.append('g')
         .attr('id', 'labels');
+
+    svg.on('mousemove', function(d, i) {
+        const DIST_THRESHOLD = 75;
+
+        // get correct mouse coords
+        var mouse = d3.mouse(this);
+        var transform = d3.zoomTransform(svg.node());
+        mouse = transform.invert(mouse);
+
+        // loop through every label
+        for (var j = 0; j < (+totalguess.text()); j++) {
+            // select the label
+            var label = d3.select('#label-'+(j+1));
+
+            // calculate dx and dy
+            var x = label.attr('x');
+            var y = label.attr('y');
+
+            var dx = x-mouse[0];
+            var dy = y-mouse[1];
+
+            // compute distance
+            var dist = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
+
+            // if distance is within the threshold, hide it
+            if (dist < DIST_THRESHOLD) {
+                label.style('display', 'none');
+            } else {
+                label.style('display', 'block');
+            }
+        }
+    })
     
     // add the map
     map = g.selectAll('.map')
@@ -203,7 +245,6 @@ function drawMap(geojson, continent) {
         .join('path')
         .attr('d', geogen)
         .classed('map', true)
-        .attr('fill', 'rgb(221, 203, 180)')
         .attr('id', function(d) { return d.properties.name_long.replaceAll(' ', '_').replaceAll('.', ''); })
         .on('mouseover', function(d, i) {
             d3.select(this).classed('highlighted', true);
@@ -229,30 +270,32 @@ function drawMap(geojson, continent) {
             // update guess count
             totalguess.text( (+totalguess.text())+1 )
 
+            // add the label for the correct country
+            var coords = getCoords(geojson, c);
+            labels.append('text')
+                .text(c)
+                .attr('id', 'label-'+ (+totalguess.text()))
+                .attr('text-anchor', 'middle')
+                .attr('x', coords[0])
+                .attr('y', coords[1])
+
             // if user is finished, finalize the map
             if (+totalguess.text() >= +totalscore.text()) {
                 // remove click listener (user is done)
                 d3.selectAll('.map').on('click', null);
 
                 d3.select('#finished').style('opacity', 1); // make it visible
-
             } else {        // otherwise, continue the quiz
-                // add the label for the correct country
-                var coords = getCoords(geojson, c);
-                labels.append('text')
-                    .text(c)
-                    .attr('text-anchor', 'middle')
-                    .attr('x', coords[0])
-                    .attr('y', coords[1])
-
-                // zoom into/center on the correct country
-                var x = coords[0], y = coords[1];
-                svg.transition().duration(dur)
-                    .call(
-                        zoom.transform,
-                        d3.zoomIdentity.translate(width/2, height/2).scale(2).translate(-x, -y)
-                    );
-                
+                // zoom into/center on the correct country (if applicable)
+                if (zoom_disabled == false) {
+                    var x = coords[0], y = coords[1];
+                    svg.transition().duration(dur)
+                        .call(
+                            zoom.transform,
+                            d3.zoomIdentity.translate(width/2, height/2).scale(2).translate(-x, -y)
+                        );
+                }
+                    
                 // remove country from countries & select a new one
                 countries.splice(idx, 1);
     

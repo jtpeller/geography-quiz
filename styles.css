@@ -6,7 +6,7 @@ body {
 }
 
 svg {
-    background-color: rgb(138, 180, 248);
+    background-color: rgb(113, 165, 255);
     border:1px solid gray;
     border-radius:10px;
     width: 1000px;
@@ -93,11 +93,11 @@ svg {
 
 /***** QUIZ *****/
 .correct {
-    fill: rgb(14, 194, 14);
+    fill: rgb(14, 194, 14) !important;
 }
 
 .incorrect {
-    fill: rgb(248, 12, 12);
+    fill: rgb(248, 12, 12) !important;
 }
 
 .gradient-transparent {
@@ -127,12 +127,13 @@ svg {
 
 .highlighted {
     stroke-width: 2px !important;
-    fill:rgb(48, 137, 253)
+    fill: rgb(48, 137, 253) !important;
 }
 
 .map {
     stroke: rgb(0, 0, 0);
     stroke-width: 1px;
+    fill: rgb(151, 151, 151);
 }
 
 .wrapper {
@@ -175,6 +176,7 @@ svg {
 }
 
 .site-btn {
+    width: 100%;
     margin: 5px;
     border: none;
     border-radius: 0px !important;
