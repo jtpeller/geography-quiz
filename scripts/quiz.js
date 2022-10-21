@@ -7,25 +7,17 @@
 
 // ids holds all the HTML ID tags for d3 to use
 let ids = {
-    left: '#left',
-    right: '#right',
-    svg: '#svg',
-    controls: '#controls',
-    continent: '#continent-dropdown',
     userscore: '#userscore',
     totalscore: '#totalscore'
 };
 
-let left, right, svg, controls, select, instruction,
+let header, content;
+
+let left, right, title, svg, controls, select, instruction,
     userscore, totalscore, percent, reset_zoom, zoom;
 let map;
 
 const dur = 500;
-
-let regions = [
-    "Africa", "Asia", "Europe", "North America", 
-    "Oceania", "South America"
-]
 
 let countries = [];
 
@@ -34,17 +26,35 @@ let width, height;  // defined in init
 let margin = {top: 10, left: 10, right: 10, bottom: 10};
 let innerwidth, innerheight; // defined in init
 
+let region;
+
 //
 // init page on load
 //
 document.addEventListener('DOMContentLoaded', function() {
     // set IDs, get d3 lets, etc.
-    left = d3.select(ids.left);
-    right = d3.select(ids.right);
+    header = d3.select('#header');
+    content = d3.select('#content')
+        .classed('container', true);
+
+    title = content.append('h2')
+        .classed('title', true)
+
+    var rowdiv = content.append('div')
+        .classed('row flex-center', true);
+    
+    left = rowdiv.append('div')
+        .attr('id', 'left')
+        .classed('col-4', true);
+
+    right = rowdiv.append('div')
+        .attr('id', 'right')
+        .classed('col', true);
 
     controls = left.append('div')
-        .attr('id', ids.controls);
-    svg = right.append('svg');
+        .attr('id', 'controls');
+    svg = right.append('svg')
+        .attr('id', 'svg');
 
     // initialize the webpage
     init();
@@ -54,29 +64,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function init() {
     // first, add everything possible without loading the data
     // this makes it sure that it's nice and snappy (and I don't load ~20MB of data)
-
-    // dropdown for selecting which continent
-    var div = controls.append('div')
-        .classed('form-group', true);
-
-    div.append('label')
-        .attr('for', ids.continent)
-        .classed('form-label my-label', true)
-        .text('Select the region:');
-
-    div.append('br')
-    select = div.append('select')
-        .classed('form-select', true)
-        .attr('id', ids.continent);
     
-    // add the options for the dropdown
-    for (let i = 0; i < regions.length; i++) {
-        select.append('option')
-            .attr('value', regions[i].replaceAll(' ', '_'))
-            .text(regions[i]);
-    }
+    // get country & its index
+    region = location.search.replace('?', '').replace('%20', ' ');
+    var idx = regions.indexOf(region);
 
-    controls.append('hr');
+    title.text(`${region} Quiz`)
+
+    // initialize navbar
+    initNavbar(header, idx);
+
+    // add the title banner thing
 
     // add the instruction (tells user which country to click on)
     let section = controls.append('section')
@@ -99,12 +97,13 @@ function init() {
     var scoretable = div.append('table')
         .classed('table table-dark', true);
 
+    var headers = ["Correct", "Incorrect", "Guesses", "Total", "% Correct"];
+
     var headerrow = scoretable.append('thead').append('tr');
-    headerrow.append('th').attr('scope', 'col').text('Correct');
-    headerrow.append('th').attr('scope', 'col').text('Incorrect');
-    headerrow.append('th').attr('scope', 'col').text('Guesses');
-    headerrow.append('th').attr('scope', 'col').text('Total');
-    headerrow.append('th').attr('scope', 'col').text('% Correct');
+
+    for (var i = 0; i < headers.length; i++) {
+        headerrow.append('th').attr('scope', 'col').text(headers[i])
+    }
 
     var body = scoretable.append('tbody').append('tr');
     userscore = body.append('td').text('0');
@@ -123,7 +122,7 @@ function init() {
 
     // add a reset_zoom button
     reset_zoom = controls.append('button')
-        .classed('btn btn-outline-light', true)
+        .classed('btn site-btn', true)
         .style('width', '100%')
         .text('Reset Zoom')
         .on('click', function() {
@@ -139,7 +138,8 @@ function init() {
     // add a reset button and some other stuff
     controls.append('hr');
     controls.append('button')
-        .classed('btn btn-outline-light', true)
+        .classed('btn site-btn', true)
+        .style('width', '100%')
         .text('Restart')
         .on('click', function() {
             // reset all counters, reset all map
@@ -155,18 +155,13 @@ function init() {
         .html(' &#8592; You finished! Click here to restart the quiz!')
         .style('opacity', 0);
 
-    // then, parse in the data. default to Africa
-    // and call draw map and whatnot
-    select.on('input', initMap);
-    select.dispatch('input');
+    // initialize the map last
+    initMap();
 }
 
 function initMap() {
     // reset all counters, reset all map
     resetCounters();
-    
-    // get the current map
-    let selected = select.property('value');
         
     // svg inits
     width = +svg.style('width').replace('px', '');
@@ -176,10 +171,10 @@ function initMap() {
 
     // promise data
     Promise.all([
-        d3.json(`data/continents/${selected}.geojson`)
+        d3.json(`data/continents/${region.replace(' ', '_')}.geojson`)
     ]).then(function(values) {
         svg.html('');       // we're drawing the map, so make sure it's empty.
-        drawMap(values[0], selected);
+        drawMap(values[0], region);
     })
 }
 
@@ -291,8 +286,8 @@ function getProjection(geojson, continent) {
         return d3.geoMercator()
             .rotate([-12, 0])
             .fitSize([innerwidth, innerheight], geojson)
-            .precision(0.1);
-    } else if (continent == 'North_America') {
+            .precision(1);
+    } else if (continent == 'North America') {
         return d3.geoNaturalEarth1()
             .rotate([14, 0])
             .fitSize([innerwidth, innerheight], geojson)
@@ -302,7 +297,7 @@ function getProjection(geojson, continent) {
             .rotate([160, 0])
             .fitSize([innerwidth, innerheight], geojson)
             .precision(0.1);
-    } else if (continent == 'South_America') {
+    } else if (continent == 'South America') {
         return d3.geoEquirectangular()
             .fitSize([innerwidth, innerheight], geojson)
             .precision(0.1);
