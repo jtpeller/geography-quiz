@@ -17,11 +17,11 @@ document.addEventListener("DOMContentLoaded", function() {
     let banner = content.append('div')
         .classed('banner', true);
 
-    let title = banner.append('span')
+    banner.append('span')
         .classed('title-box', true)
         .append('h1')
         .classed('title-card', true)
-        .text(`jtpeller's Geography Quizzes`);
+        .text(`Geography Quizzes`);
 
     // links
     let links = content.append('div')
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let linkdiv = links.append('div')
         .classed('row fit-content', true);
 
-    let chunks = chunkify(ll, 2, true);
+    let chunks = chunkify(ll2, 2, true);
 
     for (var i = 0; i < chunks.length; i++) {
         var col = linkdiv.append('div')

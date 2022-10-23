@@ -5,7 +5,7 @@
 // =  Date          : October 10, 2022
 // =================================================================
 
-let regions = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America"];
+let regions = ["Africa", "Asia", "Europe", "North America", "Oceania", "South America", "World"];
 
 let ll = [];
 
@@ -15,6 +15,18 @@ for (var i = 0; i < regions.length; i++) {
         link: regions[i]
     })
 }
+
+let r2 = ["Africa", "Europe", "Oceania", "World", "Asia", "North America", "South America",];
+
+let ll2 = [];
+
+for (var i = 0; i < r2.length; i++) {
+    ll2.push({
+        html: `quiz.html?${r2[i]}`,
+        link: r2[i]
+    })
+}
+
 
 /**
  * initNavbar() -- initializes the navbar for navigating the site

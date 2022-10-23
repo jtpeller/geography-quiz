@@ -6,8 +6,8 @@ body {
 }
 
 svg {
-    background-color: rgb(113, 165, 255);
-    border:1px solid gray;
+    background-color: rgb(66, 135, 255);
+    border:1px solid rgb(0, 0, 0);
     border-radius:10px;
     width: 1000px;
     height: 640px;
@@ -31,7 +31,7 @@ svg {
     background-color: rgb(255, 251, 0);
     display: flex;
     text-align: center !important;
-    border-radius: 5px;
+    border-radius: 100px;
 
     height: 5rem;
     min-width: 18rem;
@@ -164,6 +164,17 @@ svg {
     border-width: 0px !important; /* override an annoying pixel problem */
 }
 
+.btn-svg {
+    height: 100%;
+    transform: scale(1.5);
+
+    transition: transform 0.25s cubic-bezier(0, 0, 0.7, 1);
+}
+
+.site-btn:hover > .btn-svg {
+    transform: scale(1.8);
+}
+
 .fit-content {
     height: fit-content !important;
     width: fit-content !important;
@@ -176,12 +187,14 @@ svg {
 }
 
 .site-btn {
-    width: 100%;
+    display: block;
+
+    width: fit-content;
     margin: 5px;
     border: none;
-    border-radius: 0px !important;
+    border-radius: 100px;
     padding: 10px;
-    background-color:rgb(255, 251, 0);
+    background-color: rgb(255, 251, 0);
     color: black;
 
     font-size: 1em;
@@ -199,12 +212,25 @@ svg {
 
 .title {
     margin-top: 2rem;
-    margin-bottom: 4rem;
+    padding-bottom: 1rem;
     font-weight: bold;
     text-align: center;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.toolbox {
+    position: absolute;
+    top: 0;
+    left: 15px;
+}
+
+#banner {
+    margin-bottom: 2rem;
 }
 
 #right {
+    position: relative;
     width: 50%;
 }
 
