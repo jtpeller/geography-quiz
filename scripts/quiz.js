@@ -106,7 +106,7 @@ function init() {
     timer = controls.append('div')
         .append('h1')
         .attr('id', 'timer')
-        .classed('text-center', true)
+        .classed('text-center monospace', true)
         .text('00:00:00');
 
     controls.append('hr');
@@ -440,16 +440,10 @@ function getCoords(geojson, country) {
 function startTimer() {
     var start = Date.now();
     timerUpdate = setInterval(function() {
-        var delta = Date.now() - start;
-
-        // parse the time
-        delta /= 10;        // don't need microseconds
-
-        var ms = Math.floor(delta % 100);
-        delta /= 100;
-        var sec = Math.floor(delta % 100);
-        delta /= 100;
-        var min = Math.floor(delta % 100);
+        var delta = new Date(Date.now() - start);
+        var min = delta.getMinutes();
+        var sec = delta.getSeconds();
+        var ms = Math.floor(delta.getMilliseconds() / 10);
 
         // display this time
         if (min < 10) {
@@ -463,7 +457,7 @@ function startTimer() {
         }
         timer.text(`${min}:${sec}:${ms}`)
 
-    }, 20)      // every millisecond, update timer
+    }, 20)      // update timer
 }
 
 /**
