@@ -1,0 +1,105 @@
+/***** ELEMENTS *****/
+svg {
+    background-color: var(--water-color);
+    border: 2px solid var(--accent-color);
+    border-radius: 10px;
+}
+
+/***** CLASSES *****/
+.correct {
+    fill: var(--correct) !important;
+}
+
+.incorrect {
+    fill: var(--incorrect) !important;
+}
+
+.country-select {
+    background-color: var(--accent-color);
+    border-radius: 5px;
+    color: black;
+    padding: 5px;
+}
+
+.gradient-transparent {
+    position: relative;
+    background-image: linear-gradient(to bottom, transparent 95%, transparent 100%);
+    z-index: 1;
+}
+
+.gradient-transparent::before {
+    position: absolute;
+    content: "";
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: linear-gradient(to bottom, transparent 50%, rgba(255, 252, 92, 0.733) 90%);
+    z-index: -1;
+
+    transition: opacity 0.25s linear;
+    opacity: 0;
+}
+
+.gradient-transparent:hover::before {
+    opacity: 1;
+}
+
+.highlighted {
+    stroke-width: 2px !important;
+    fill: var(--hi-country-fill) !important;
+}
+
+.map {
+    stroke: var(--stroke-color);
+    stroke-width: 1px;
+    fill: var(--grey-fill);
+}
+
+.monospace {
+    font-family: 'Trebuchet MS', "Lucida Console", Courier, monospace !important;
+}
+
+.quiz-title {
+    margin-top: 2rem;
+    padding-bottom: 1rem;
+    font-weight: bold;
+    text-align: center;
+
+    border-bottom: 1px solid var(--grey-fill);
+}
+
+.site-btn:hover > .btn-svg {
+    transform: scale(1.8);
+}
+
+.site-btn {
+    display: block;
+
+    width: fit-content;
+    margin: 5px;
+    border: none;
+    border-radius: 100px;
+    padding: 10px;
+    background-color: var(--accent-color);
+    color: black;
+
+    font-size: 1em;
+    height: 50px;
+
+    transition: font-size 200ms ease-in-out;
+}
+
+.site-btn:hover {
+    background-color: var(--accent-color);
+    color: black;
+
+    font-size: 1.15em;
+}
+
+.toolbox {
+    position: absolute;
+    top: 0;
+    left: 15px;
+    padding: 5px;
+}

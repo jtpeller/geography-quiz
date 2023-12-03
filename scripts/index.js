@@ -5,35 +5,14 @@
 // =  Date          : March 29, 2022
 // =================================================================
 
-let content;
-
 document.addEventListener("DOMContentLoaded", function() {
-    // get d3 objects
-    content = d3.select('#content');
+    let chunks = chunkify(ll, 2, true);
 
-    //
-    // initialize site
-    //
-    let banner = content.append('div')
-        .classed('banner', true);
-
-    banner.append('span')
-        .classed('title-box', true)
-        .append('h1')
-        .classed('title-card', true)
-        .text(`Geography Quizzes`);
-
-    // links
-    let links = content.append('div')
-        .classed('d-flex justify-content-center link-card', true);
-
-    let linkdiv = links.append('div')
-        .classed('row fit-content', true);
-
-    let chunks = chunkify(ll2, 2, true);
+    let row = d3.create('div')
+        .classed('row', true);
 
     for (var i = 0; i < chunks.length; i++) {
-        var col = linkdiv.append('div')
+        var col = row.append('div')
             .classed('link-list col', true);
 
         var temp = chunks[i];
@@ -48,4 +27,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 .text(temp[j].link);
         }
     }
+    
+    d3.select('#link-div').append(() => row.node());
 })

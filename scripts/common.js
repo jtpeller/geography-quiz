@@ -16,29 +16,17 @@ for (var i = 0; i < regions.length; i++) {
     })
 }
 
-let r2 = ["Africa", "Europe", "Oceania", "World", "Asia", "North America", "South America",];
-
-let ll2 = [];
-
-for (var i = 0; i < r2.length; i++) {
-    ll2.push({
-        html: `quiz.html?${r2[i]}`,
-        link: r2[i]
-    })
-}
-
-
 /**
  * initNavbar() -- initializes the navbar for navigating the site
  */
  function initNavbar(header, idx) {
-    let nav = header.append('nav')
-    nav.classed('navbar navbar-expand-lg navbar-dark my-bg-dark', true)
+    let nav = d3.create('nav')
+        .classed('navbar navbar-expand-lg navbar-dark my-bg-dark', true)
 
     let navdiv = nav.append('div')
         .classed('container-fluid', true);
     
-    let brand = navdiv.append('a')
+    navdiv.append('a')
         .classed('navbar-brand d-lg-none gradient-transparent border-highlight', true)
         .attr('href', 'index.html')
         .text('Geography');
@@ -93,6 +81,8 @@ for (var i = 0; i < r2.length; i++) {
                 .text(ll[i].link);
         }
     }
+
+    header.append(() => nav.node());
 }
 
 // pulled from: https://stackoverflow.com/questions/8188548/splitting-a-js-array-into-n-arrays

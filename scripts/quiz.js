@@ -5,35 +5,38 @@
 // =    Author      : jtpeller
 // =================================================================
 
-// ids holds all the HTML ID tags for d3 to use
-let ids = {
-    userscore: '#userscore',
-    totalscore: '#totalscore'
-};
-
 // elements
-let header, content, title, svg,    // elements
-    controls,                       // left side score thingy
-    instruction,                    // says which country to select
-    userscore, totalscore, percent, // scores 
-    timer,                          // timer located inside controls
-    zoom;
-let map;
+let svg,
+    instruction,    // says which country to select
+    timer;          // timer located inside controls
+let zoom;           // zoom function
 
 const dur = 500;
 
 // country and region stuff
-let region;
-let countries = [];
-let all_countries = [];
-let idx;
+let region;                 // which region is being quizzed
+let countries = [];         // countries of this region that haven't been selected yet
+let all_countries = [];     // all countries of this region
+let idx;                    // idx of country
 
 // svg dims
-let width, height;  // defined in init
-let margin = {top: 10, left: 10, right: 10, bottom: 10};
-let innerwidth, innerheight; // defined in init
+const width = 1000;
+const height = 640;
+let innerwidth, innerheight;
 
 let timerUpdate;        // timer interval function
+
+// score values
+let score = {
+    cor: 0,     // correct
+    inc: 0,     // incorrect
+    gue: 0,     // user guess count
+    tot: 0,     // total countries
+    per: 0,     // percent correct
+}
+
+// score elements
+let elem = {};
 
 // flags
 let zoom_disabled = true;
@@ -43,185 +46,71 @@ let first_click = true;
 // init page on load
 //
 document.addEventListener('DOMContentLoaded', function() {
-    // set IDs, get d3 lets, etc.
     header = d3.select('#header');
-    content = d3.select('#content')
-        .classed('container', true);
 
-    banner = content.append('div')
-        .attr('id', 'banner')
-        .classed('text-center', true);
-
-    title = banner.append('h2')
-        .classed('title', true)
-        
-    // add the instruction (tells user which country to click on)
-    var div = banner.append('div')
-        .attr('id', 'country-span');
-
-    //div.append('span')
-    //    .text('Select: ')
-    //    .classed('h2', true);
-
-    instruction = div.append('span')
-        .classed('country-select h3', true)
-        .text('');
-
-    // add the left side (score & time) and right side (map)
-    var rowdiv = content.append('div')
-        .classed('row flex-center', true);
-    
-    var left = rowdiv.append('div')
-        .attr('id', 'left')
-        .classed('col-3', true);
-
-    var right = rowdiv.append('div')
-        .attr('id', 'right')
-        .classed('col', true);
-
-    controls = left.append('div')
-        .attr('id', 'controls');
-    svg = right.append('svg')
-        .attr('id', 'svg');
-
-    // initialize the webpage
-    init();
-})
-
-
-function init() {
-    // first, add everything possible without loading the data
-    // this makes it sure that it's nice and snappy (and I don't load ~20MB of data)
-    
     // get region & its index
-    region = location.search.replace('?', '').replace('%20', ' ');
-    var idx = regions.indexOf(region);
-
-    title.text(`${region} Quiz`)
-
-    // initialize navbar
-    initNavbar(header, idx);
-
-    // add the timer
-    timer = controls.append('div')
-        .append('h1')
-        .attr('id', 'timer')
-        .classed('text-center monospace', true)
-        .text('00:00:00');
-
-    controls.append('hr');
-
-    // add the score
-    let score = controls.append('div')
-        .classed('text-center', true)
-    
-    var div = score.append('div')
-        .classed('row', true);
-
-    var scoretable = div.append('div')
-        .classed('my-table', true);
-
-    var headers = ["Correct", "Incorrect", "Guesses", "Total", "Score"];
-
-    for (var i = 0; i < headers.length; i++) {
-        var row = scoretable.append('div')
-            .classed('row', true)
-
-        row.append('div')
-            .classed('col h5 text-end', true)
-            .text(headers[i])
-
-        row.append('div')
-            .classed('col h5 text-start', true)
-            .attr('id', headers[i])
-            .text('0')
+    if (this.location.search == '') {
+        this.location.search = 'World'
+    } else {
+        region = location.search.replace('?', '').replace('%20', ' ');
     }
+    var i = regions.indexOf(region);
+    initNavbar(header, i);
 
-    // set up d3 elements for this
-    userscore =  d3.select('#' + headers[0]);
-    wrongscore = d3.select('#' + headers[1]);
-    totalguess = d3.select('#' + headers[2]);
-    totalscore = d3.select('#' + headers[3]);
-    percent =    d3.select('#' + headers[4]);
+    // update title
+    d3.select('#title').text(`${region} Quiz`)
 
-    // zoom setup
-    zoom = d3.zoom()
-        .scaleExtent([1, 8])
-        .on('zoom', function() {
-            d3.select('#svg-g').selectAll('path').attr('transform', d3.event.transform);
-            d3.select('#labels').selectAll('text').attr('transform', d3.event.transform);
-        });
-
-    // add a reset zoom button
-    svg_toolbox = d3.select('#right').append('div')
-        .attr('id', 'svg-toolbox')
-        .classed('toolbox', true)
-
-    var reset = svg_toolbox.append('button')
-        .classed('btn site-btn', true)
-        .attr('title', 'Reset Zoom')
-        .on('click', function() {
-            svg.transition().duration(dur).call(zoom.transform, d3.zoomIdentity);
-        }).dispatch('click');
-
-    reset.append('img')
-        .classed('btn-svg', true)
-        .attr('src', 'resources/reset_zoom.svg')
-        .attr('alt', 'Reset Zoom');
-
-    svg.call(zoom)                      // establish zoom behavior
-        .on('dblclick.zoom', function() {
-            svg.transition().duration(dur).call(zoom.transform, d3.zoomIdentity);
-        });     // no dbl click to zoom
-
-    // add a disable zoom checkbox
-    controls.append('hr');
-    var div = controls.append('div')
-        .classed('form-check form-switch', true);
-
-    div.append('input')
-        .classed('form-check-input', true)
-        .attr('type', 'checkbox')
-        .attr('value', '')
-        .attr('id', 'disable-zoom')
-        .property('checked', true)
-        .on('click', function() {
-            zoom_disabled = d3.select(this).property('checked');
-        })
-
-    div.append('label')
-        .classed('form-check-label', true)
-        .attr('for', 'disable-zoom')
-        .text('Disable Zoom Onto Countries')
-
-
-    // add a reset button and some other stuff
-    var restart = svg_toolbox.append('button')
-        .classed('btn site-btn', true)
-        .attr('title', 'Restart Quiz')
-        .on('click', function() {
-            resetQuiz();
-            initMap();
-        })
-
-    restart.append('img')
-        .classed('btn-svg', true)
-        .attr('src', 'resources/restart.svg')
-        .attr('alt', 'Restart');
+    // select instruction, timer, and map
+    instruction = d3.select('#country-to-select');
+    timer = d3.select('#timer')
+    svg = d3.select('#map')
+        .attr('viewBox', `0 0 ${width} ${height}`);
+    
+    elem = {
+        cor: d3.select('#correct'),
+        inc: d3.select('#incorrect'),
+        gue: d3.select('#guesses'),
+        tot: d3.select('#total'),
+        per: d3.select('#percent'),
+    }
 
     // initialize the map last
     initMap();
-}
+})
 
 function initMap() {
     // reset all counters, reset all map
     resetQuiz();
-        
+    
     // svg inits
-    width = +svg.style('width').replace('px', '');
-    height = +svg.style('height').replace('px', '');
+    const margin = {top: 10, left: 10, right: 10, bottom: 10};
     innerwidth = width - margin.left - margin.right;
     innerheight = height - margin.top - margin.bottom;
+
+    // add behavior for the zoom functionality
+    zoom = d3.zoom()
+        .extent([[0, 0], [width, height]])
+        .scaleExtent([1, 8])
+        .on('zoom', zoomed);
+
+    // add behavior for the reset button
+    d3.select('#reset-btn').on('click', function(e) {
+        svg.transition().duration(dur).call(zoom.transform, d3.zoomIdentity);
+    }).dispatch('click');
+
+    // double-click-to-zoom functionality set to zoom out only
+    svg.call(zoom);
+
+    // add behavior for disabling zoom (switch-checkbox)
+    d3.select('#disable-zoom').on('click', function(e) {
+        zoom_disabled = d3.select(this).property('checked');
+    })
+
+    // add a reset button and some other stuff
+    d3.select('#restart-btn').on('click', function(e) {
+        resetQuiz();
+        initMap();
+    })
 
     // promise data
     Promise.all([
@@ -245,38 +134,38 @@ function drawMap(geojson, continent) {
     // save countries off to a backup (for resets)
     all_countries = [...countries];
     
-    // then, randomly pick a country and set instruction
-    idx = rng(0, countries.length)
-    instruction.text(countries[idx])
-    totalscore.text(all_countries.length)
+    // set total countries count
+    score.tot = all_countries.length;
+    elem.tot.text(score.tot);
 
+    // then, randomly pick a country and set instruction
+    idx = rng(0, countries.length);
+    instruction.text(countries[idx]);
+
+    // append g elements
     let g = svg.append('g').attr('id', 'svg-g');
-    let labels = svg.append('g')
-        .attr('id', 'labels');
+    let labels = svg.append('g').attr('id', 'labels');
 
     // hide labels when they're close to the user's mouse
-    svg.on('mousemove', function(d, i) {
+    svg.on('mousemove', function(e) {
         const DIST_THRESHOLD = 75;
 
         // get correct mouse coords
-        var mouse = d3.mouse(this);
-        var transform = d3.zoomTransform(svg.node());
-        mouse = transform.invert(mouse);
+        const mouse = d3.zoomTransform(svg.node()).invert(d3.pointer(e));
 
         // loop through every label
-        for (var j = 0; j < (+totalguess.text()); j++) {
+        for (var j = 0; j < score.gue; j++) {
             // select the label
-            var label = d3.select('#label-'+(j+1));
-
+            var label = d3.select(`#label-${j+1}`);
             // calculate dx and dy
             var x = label.attr('x');
             var y = label.attr('y');
 
-            var dx = x-mouse[0];
-            var dy = y-mouse[1];
+            var dx = x - mouse[0];
+            var dy = y - mouse[1];
 
             // compute distance
-            var dist = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
+            var dist = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 
             // if distance is within the threshold, hide it
             if (dist < DIST_THRESHOLD) {
@@ -288,16 +177,16 @@ function drawMap(geojson, continent) {
     })
     
     // add the map
-    map = g.selectAll('.map')
+    g.selectAll('.map')
         .data(geojson.features)
         .join('path')
         .attr('d', geogen)
         .classed('map', true)
         .attr('id', function(d) { return d.properties.name_long.replaceAll(' ', '_').replaceAll('.', ''); })
-        .on('mouseover', function(d, i) {
+        .on('mouseover', function(e, d) {
             d3.select(this).classed('highlighted', true);
         })
-        .on('click', function(d, i) {
+        .on('click', function(e, d) {
             if (first_click) {
                 startTimer();
                 first_click = false;
@@ -313,21 +202,21 @@ function drawMap(geojson, continent) {
                 .classed('highlighted', false); // remove any highlighting
 
             if (d.properties.name_long === c) {
-                userscore.text((+userscore.text())+1)
-                var val = +userscore.text() / +totalscore.text() * 100
-                percent.text( `${Math.round( (val + Number.EPSILON) * 100) / 100}%` )
+                elem.cor.text(++score.cor)
+                var val = score.cor / score.tot * 100
+                elem.per.text( `${Math.round( (val + Number.EPSILON) * 100) / 100}%` )
             } else {
-                wrongscore.text( (+wrongscore.text())+1);
+                elem.inc.text(++score.inc);
             }
             
             // update guess count
-            totalguess.text( (+totalguess.text())+1 )
+            elem.gue.text(++score.gue)
 
             // add the label for the correct country
             var coords = getCoords(geojson, c);
             labels.append('text')
                 .text(c)
-                .attr('id', 'label-'+ (+totalguess.text()))
+                .attr('id', 'label-'+ score.gue)
                 .classed('country-label', true)
                 .attr('text-anchor', 'middle')
                 .attr('x', coords[0])
@@ -336,13 +225,13 @@ function drawMap(geojson, continent) {
             // TODO: transform the label by zoom/pan
 
             // if user is finished, finalize the map
-            if (+totalguess.text() >= +totalscore.text()) {
+            if (score.gue >= score.tot) {
                 // remove click listener (user is done)
                 d3.selectAll('.map').on('click', null);
 
                 d3.select('#country-span')
-                    .html('')
                     .append('h2')
+                    .attr('id', 'complete')
                     .text('Congratulations, you have completed the quiz!');
                     
                 // stop timer
@@ -354,7 +243,8 @@ function drawMap(geojson, continent) {
                     svg.transition().duration(dur)
                         .call(
                             zoom.transform,
-                            d3.zoomIdentity.translate(width/2, height/2).scale(2).translate(-x, -y)
+                            d3.zoomIdentity.translate(width/2, height/2).scale(2).translate(-x, -y),
+                            d3.pointer(e, svg.node())
                         );
                 }
                     
@@ -366,7 +256,7 @@ function drawMap(geojson, continent) {
                 instruction.text(c);
             }
         })
-        .on('mouseout', function(d, i) {
+        .on('mouseout', function(e, d, i) {
             d3.select(this).classed('highlighted', false);
         });
 }
@@ -473,24 +363,20 @@ function resetQuiz() {
     timer.text('00:00:00')
     first_click = true;
 
-    // reset counters
-    userscore.text('0');
-    wrongscore.text('0');
-    totalguess.text('0');
-    totalscore.text(all_countries.length);
-    percent.text('0');
+    // reset counters; (elem.tot does not change!)
+    score.cor = 0
+    score.inc = 0
+    score.gue = 0
+    score.per = 0
 
-    // reset #country-span
-    var div = d3.select('#country-span')
-        .html('');
+    elem.cor.text('0');
+    elem.inc.text('0');
+    elem.gue.text('0');
+    elem.per.text('0%');
 
-    div.append('span')
-        .text('Select: ')
-        .classed('h2', true);
-
-    instruction = div.append('span')
-        .classed('country-select h3', true)
-        .text('');
+    // reset instructions, remove completion text
+    d3.select('#complete').remove();
+    instruction.text('');
         
     // reset countries
     countries = all_countries;
@@ -499,4 +385,9 @@ function resetQuiz() {
     idx = rng(0, countries.length);
     c = countries[idx];
     instruction.text(c);
+}
+
+function zoomed({transform}) {
+    d3.select('#svg-g').selectAll('path').attr('transform', transform);
+    d3.select('#labels').selectAll('text').attr('transform', transform);
 }

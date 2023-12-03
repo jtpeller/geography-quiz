@@ -1,27 +1,86 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en-us">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Geography Quiz</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
     <!-- CSS & Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT"
-        crossorigin="anonymous">
-    <link rel='stylesheet' href='styles.css'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel='stylesheet' href='styles/common.css'>
+    <link rel='stylesheet' href='styles/quiz.css'>
+
+    <!-- scripts -->
+    <script src='https://d3js.org/d3.v7.min.js'></script>
+    <script src="scripts/common.js"></script>
+    <script src="scripts/quiz.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </head>
 
 <body>
     <div id="header"></div>
-    <div id="content"></div>
+    <div id="content" class="container">
+        <div class="py-2 text-center" id="banner">
+            <h1 class="quiz-title" id="title">Quiz</h1>
+            <div id="country-span">
+                <span class="h2">Select:</span>
+                <span class="country-select h2" id="country-to-select"></span>
+            </div>
+        </div>
 
-    <!-- scripts -->
-    <script src='https://d3js.org/d3.v5.min.js'></script>
-    <script src="scripts/common.js"></script>
-    <script src="scripts/quiz.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+        <div class="row">
+            <div class="col-sm-12 col-lg-9 position-relative" id="map-div">
+                <svg id="map"></svg>
+                <div id="svg-toolbox" class="toolbox">
+                    <button class="btn site-btn" title="Reset Zoom" id="reset-btn">
+                        <img class="btn-svg" src="resources/reset_zoom.svg" alt="Reset Zoom" />
+                    </button>
+                    <button class="btn site-btn" title="Restart Quiz" id="restart-btn">
+                        <img class="btn-svg" src="resources/restart.svg" alt="Restart Quiz" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-lg-3">
+                <div id="controls" class="py-3">
+                    <div id="timer-div">
+                        <h1 class="text-center monospace" id="timer">00:00:00</h1>
+                    </div>
+                    <hr>
+                    <div id="score-div">
+                        <div class="row">
+                            <div class="col-6 text-end">Correct</div>
+                            <div class="col-6 monospace text-start" id="correct">0</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 text-end">Incorrect</div>
+                            <div class="col-6 monospace text-start" id="incorrect">0</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 text-end">Guesses</div>
+                            <div class="col-6 monospace text-start" id="guesses">0</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 text-end">Total</div>
+                            <div class="col-6 monospace text-start" id="total">0</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 text-end">Percent</div>
+                            <div class="col-6 monospace text-start" id="percent">0%</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" value="" id="disable-zoom" checked="true">
+                        <label class="form-check-label" for="disable-zoom">Disable zoom onto countries after each guess <i>[Recommended: Keep on for speed]</i></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

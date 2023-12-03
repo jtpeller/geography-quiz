@@ -1,0 +1,123 @@
+:root {
+    --master-font-size: 25px;
+    --title-factor: 1.25;
+    --subtitle-factor: 0.5;
+    --status-factor: 0.4;
+    --square-factor: 1;
+
+    --btn-factor: 0.5;
+    --btn-side-pad: 4rem;
+
+    --banner-top-pad: 36px;
+
+    --svg-btn-size: 75px;
+
+    --accent-color: rgb(255, 251, 0);
+    --bg-color: rgb(13, 13, 15);
+    --text-color: rgb(235, 235, 235);
+
+    /** QUIZ COLORS **/
+    --water-color: rgb(42, 98, 196);
+    --hi-country-fill: rgb(48, 137, 253);
+    --grey-fill: rgb(121, 121, 121);
+    --stroke-color: rgb(0, 0, 0);
+    --correct: rgb(14, 194, 14);
+    --incorrect: rgb(248, 12, 12);
+}
+
+/***** ELEMENTS *****/
+body {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+	background-color: var(--bg-color);
+	color: var(--text-color);
+}
+
+/***** CLASSES *****/
+.border-highlighted {
+    border-bottom: 5px solid var(--accent-color);
+}
+
+.border-highlight {
+    border-radius: 0px;
+    border-bottom: 5px inset transparent;
+
+    transition: border-bottom 250ms ease;
+}
+
+.border-highlight:hover {
+    border-bottom: 5px solid var(--accent-color);
+}
+
+.btn {
+    border-width: 0px !important; /* override an annoying pixel problem */
+}
+
+.btn-svg {
+    height: 100%;
+    transform: scale(1.5);
+
+    transition: transform 250ms ease;
+}
+
+/* KEYFRAMES */
+@keyframes fadeIn {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* QUERIES */
+/* LG */
+@media only screen and (min-width: 992px) {
+    :root {
+        --master-font-size: 64px;
+        --btn-side-pad: 60px;
+        --banner-top-pad: 72px;
+        --game-btn-size: 64px;
+    }
+}
+
+/* MD */
+@media only screen and (min-width: 769px) and (max-width: 992px) {
+    :root {
+        --master-font-size: 56px;
+        --btn-side-pad: 54px;
+        --banner-top-pad: 96px;
+        --game-btn-size: 56px;
+    }
+}
+
+/* S */
+@media only screen and (min-width: 592px) and (max-width: 768px) {
+    :root {
+        --master-font-size: 48px;
+        --btn-side-pad: 48px;
+        --banner-top-pad: 128px;
+        --game-btn-size: 48px;
+    }
+}
+
+/* XS */
+@media only screen and (max-width: 591px) {
+    :root {
+        --master-font-size: 36px;
+        --btn-side-pad: 42px;
+        --banner-top-pad: 96px;
+        --game-btn-size: 48px;
+    }
+}
+
+/* XXS */
+@media only screen and (max-width: 396px) {
+    :root {
+        --master-font-size: 24px;
+        --btn-side-pad: 36px;
+        --banner-top-pad: 72px;
+        --game-btn-size: 48px;
+    }
+}
