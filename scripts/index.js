@@ -4,29 +4,30 @@
 // =  Author        : jtpeller
 // =  Date          : March 29, 2022
 // =================================================================
+"use strict";
 
 document.addEventListener("DOMContentLoaded", function() {
-    let chunks = chunkify(ll, 2, true);
+    const utils = new Utils();
+    let chunks = utils.chunkify(2, true);
 
-    let row = d3.create('div')
-        .classed('row', true);
+    // populate the row
+    let row = utils.create('div', {classList: 'row'})
+    for (let i = 0; i < chunks.length; i++) {
+        let col = utils.append(row, 'div', {classList: 'col link-list'});
+        let temp = chunks[i];
 
-    for (var i = 0; i < chunks.length; i++) {
-        var col = row.append('div')
-            .classed('link-list col', true);
-
-        var temp = chunks[i];
-
-        for (var j = 0; j < temp.length; j++) {
-            col.append('a')
-                .classed('btn btn-item gradient', true)
-                .attr('href', temp[j].html)
-                .append('a')
-                .classed('btn-link', true)
-                .attr('href', temp[j].html)
-                .text(temp[j].link);
+        // populate columns
+        for (let j = 0; j < temp.length; j++) {
+            let abtn = utils.append(col, 'a', {
+                classList: 'btn btn-item gradient',
+                href:  temp[j].href
+            });
+            utils.append(abtn, 'a', {
+                classList: 'btn-link',
+                href: temp[j].href,
+                text: temp[j].text
+            })
         }
     }
-    
-    d3.select('#link-div').append(() => row.node());
+    utils.select('#link-div').append(row);
 })

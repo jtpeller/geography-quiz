@@ -5,8 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Geography Quiz</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>Quiz | Geography Quiz</title>
 
     <!-- CSS & Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -14,10 +13,10 @@
     <link rel='stylesheet' href='styles/quiz.css'>
 
     <!-- scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <script src='https://d3js.org/d3.v7.min.js'></script>
     <script src="scripts/common.js"></script>
     <script src="scripts/quiz.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -74,8 +73,16 @@
                     </div>
                     <hr>
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" value="" id="disable-zoom" checked="true">
-                        <label class="form-check-label" for="disable-zoom">Disable zoom onto countries after each guess <i>[Recommended: Keep on for speed]</i></label>
+                        <input class="form-check-input" type="checkbox" value="" id="enable-zoom">
+                        <label class="form-check-label" for="enable-zoom">Enable zoom onto countries after each guess <i>[Recommended: Keep off for speed]</i></label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" value="" id="enable-timer" checked>
+                        <label class="form-check-label" for="enable-timer">Enable timer</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" value="" id="enable-labels" checked>
+                        <label class="form-check-label" for="enable-labels">Show country labels</label>
                     </div>
                 </div>
             </div>

@@ -33,6 +33,10 @@ body {
 }
 
 /***** CLASSES *****/
+.bg-dark {
+    background-color: var(--bg-color) !important;
+}
+
 .border-highlighted {
     border-bottom: 5px solid var(--accent-color);
 }
